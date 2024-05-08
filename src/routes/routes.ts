@@ -1,15 +1,16 @@
 import Router from 'koa-router';
-import bookHandler from '../handlers/books.handler';
+import todoHander from '../handlers/todoes.handler';
 
-// Prefix all routes with /books
 const router = new Router({
   prefix: '/api',
 });
 
-router.get('/books', bookHandler.getBooks);
-router.get('/books/:id', bookHandler.getBookById);
-router.post('/books', bookHandler.createdBook);
-router.delete('/books/:id', bookHandler.deletedBook);
-router.put('/books/:id', bookHandler.updatedBook);
+router.get('/todoes', todoHander.getTodoes);
+router.get('/todoes/:id', todoHander.getTodoById);
+router.post('/todoes', todoHander.createdTodo);
+router.delete('/todoes/:id?', todoHander.deletedTodo);
+router.post('/todoes/deleteTodoList', todoHander.deletedTodoList);
+router.put('/todoes/updateTodoList', todoHander.updatedTodoList);
+router.put('/todoes/:id', todoHander.updatedTodo);
 
 export default router;
