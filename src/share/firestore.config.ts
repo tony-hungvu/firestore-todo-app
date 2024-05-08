@@ -8,4 +8,4 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-export const postRef = db.collection('books');
+export const postRef = db.collection('todoes');
