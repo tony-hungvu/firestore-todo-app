@@ -3,8 +3,8 @@ import todoRepository from '../share/todoRepository';
 
 const getTodoes = async (ctx: Context) => {
   try {
-    const todoes = await todoRepository.getAll();
-
+    const { limit, sort } = ctx.query;
+    const todoes = await todoRepository.getAll({ limit, sort });
     ctx.body = {
       data: todoes,
     };
@@ -53,11 +53,12 @@ const createdTodo = async (ctx: any) => {
 const deletedTodo = async (ctx: Context) => {
   const { id } = ctx.params;
   try {
-    await todoRepository.deleted(id);
+    const deletedTodo = await todoRepository.deleted(id);
     ctx.status = 200;
     ctx.body = {
       success: true,
       message: 'Todo deleted successfully',
+      deletedTodo,
     };
   } catch (error: any) {
     ctx.status = 500;
@@ -71,11 +72,12 @@ const deletedTodo = async (ctx: Context) => {
 const deletedTodoList = async (ctx: any) => {
   const { ids } = ctx.request.body;
   try {
-    await todoRepository.deletedList(ids);
+    const deletedTodoList = await todoRepository.deletedList(ids);
     ctx.status = 200;
     ctx.body = {
       success: true,
       message: 'Todo list deleted successfully',
+      deletedTodoList,
     };
   } catch (error: any) {
     ctx.status = 500;
@@ -89,12 +91,13 @@ const deletedTodoList = async (ctx: any) => {
 const updatedTodo = async (ctx: Context) => {
   const { id } = ctx.params;
   try {
-    await todoRepository.updated(id);
+    const updatedTodo = await todoRepository.updated(id);
 
     ctx.status = 200;
     ctx.body = {
       success: true,
       message: `Todo updated successfully with id: ${id}`,
+      updatedTodo,
     };
   } catch (error: any) {
     ctx.status = 500;
@@ -108,10 +111,11 @@ const updatedTodo = async (ctx: Context) => {
 const updatedTodoList = async (ctx: any) => {
   const { ids } = ctx.request.body;
   try {
-    await todoRepository.updatedList(ids);
+    const updatedList = await todoRepository.updatedList(ids);
 
     ctx.status = 200;
     ctx.body = {
+      updatedList,
       success: true,
       message: `Todo list updated successfully with id: ${ids}`,
     };

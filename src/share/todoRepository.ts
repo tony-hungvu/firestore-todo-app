@@ -1,14 +1,27 @@
-import { Timestamp } from 'firebase-admin/firestore';
+import { DocumentData, Query, Timestamp } from 'firebase-admin/firestore';
+
 import { ToDoes } from '../handlers/todoes.interface';
 import { postRef } from './firestore.config';
 
-const getAll = async () => {
-  const dataFirestore = await postRef.get();
-  const snapshot = dataFirestore.docs.map((doc) => {
-    return { id: doc.id, ...doc.data() };
-  });
+const getAll = async ({ limit, sort }: any) => {
+  // let query: Query<DocumentData> = postRef;
 
-  return snapshot;
+  // if (sort && (sort.toLowerCase() === 'asc' || sort.toLowerCase() === 'desc')) {
+  //   query = query.orderBy('createdAt', sort.toLowerCase());
+  // }
+
+  // if (!isNaN(parseInt(limit))) {
+  //   query = query.limit(parseInt(limit));
+  // }
+
+  const querySnapshot = await postRef.get();
+  const data = querySnapshot.docs.map((doc) => {
+    return {
+      ...doc.data(),
+      id: doc.id,
+    };
+  });
+  return data;
 };
 
 const getById = async (id: string) => {
@@ -25,26 +38,28 @@ const getById = async (id: string) => {
 };
 
 const created = async (data: ToDoes) => {
+  const currentTime: Timestamp = Timestamp.now();
+
+  const dateObject: Date = currentTime.toDate();
+
+  const formattedDate: string = dateObject.toISOString();
   const requestBody = {
     text: data.text,
     isCompleted: false,
-    createdAt: Timestamp.fromDate(new Date()),
+    createdAt: formattedDate,
   };
   const docRef = await postRef.add(requestBody);
   console.log('Document successfully written with ID: ', docRef.id);
-  return docRef.id;
+  return {
+    id: docRef.id,
+    ...requestBody,
+  };
 };
 
 const deleted = async (id: string) => {
-  const todo = await getById(id);
-  console.log('todo', todo);
-
-  if (!todo) {
-    return null;
-  }
-  const snapshot = await postRef.doc(id).delete();
-
-  return snapshot;
+  await postRef.doc(id).delete();
+  const todoDeteled = await getById(id);
+  return todoDeteled;
 };
 
 const deletedList = async (ids: string[]) => {
@@ -56,16 +71,11 @@ const deletedList = async (ids: string[]) => {
 };
 
 const updated = async (id: string) => {
-  const todo = await getById(id);
-  if (!todo) {
-    return null;
-  }
-
-  const snapshot = await postRef.doc(id).update({
+  await postRef.doc(id).update({
     isCompleted: true,
   });
-
-  return snapshot;
+  const todoUpdated = await getById(id);
+  return todoUpdated;
 };
 
 const updatedList = async (ids: string[]) => {
