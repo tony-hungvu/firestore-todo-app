@@ -4,21 +4,21 @@ import { ToDoes } from '../handlers/todoes.interface';
 import { postRef } from './firestore.config';
 
 const getAll = async ({ limit, sort }: any) => {
-  // let query: Query<DocumentData> = postRef;
+  let query: Query<DocumentData> = postRef;
+  if (sort && (sort.toLowerCase() === 'asc' || sort.toLowerCase() === 'desc')) {
+    query = query.orderBy('createdAt', sort.toLowerCase());
+  }
 
-  // if (sort && (sort.toLowerCase() === 'asc' || sort.toLowerCase() === 'desc')) {
-  //   query = query.orderBy('createdAt', sort.toLowerCase());
-  // }
+  if (!isNaN(parseInt(limit))) {
+    query = query.limit(parseInt(limit));
+  }
 
-  // if (!isNaN(parseInt(limit))) {
-  //   query = query.limit(parseInt(limit));
-  // }
-
-  const querySnapshot = await postRef.get();
+  const querySnapshot = await query.get();
   const data = querySnapshot.docs.map((doc) => {
     return {
       ...doc.data(),
       id: doc.id,
+      createdAt: doc.createTime.toDate(),
     };
   });
   return data;
@@ -63,11 +63,7 @@ const deleted = async (id: string) => {
 };
 
 const deletedList = async (ids: string[]) => {
-  return Promise.all(
-    ids.map(async (id) => {
-      return await deleted(id);
-    })
-  );
+  return Promise.all(ids.map((id) => deleted(id)));
 };
 
 const updated = async (id: string) => {
@@ -79,11 +75,7 @@ const updated = async (id: string) => {
 };
 
 const updatedList = async (ids: string[]) => {
-  return Promise.all(
-    ids.map(async (id) => {
-      return await updated(id);
-    })
-  );
+  return Promise.all(ids.map((id) => updated(id)));
 };
 
 export default {
